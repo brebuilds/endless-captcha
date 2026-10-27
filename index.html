@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Please verify you are human</title>
+<meta name="description" content="Just a quick verification. It will only take a moment.">
+<meta property="og:title" content="Please verify you are human">
+<meta property="og:description" content="Just a quick verification. It will only take a moment.">
+<meta property="og:image" content="/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='3' width='26' height='26' rx='5' fill='white' stroke='%235b8fd9' stroke-width='2.5'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%239aa3ad' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/assets/captcha.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  body {
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+    box-sizing: border-box;
+  }
+  main { flex: 1; display: flex; align-items: center; justify-content: center; padding-block: 24px; }
+  .corner { display: flex; justify-content: flex-end; padding-block: 4px 10px; }
+  .corner a {
+    font: 11.5px/1.2 Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #6b6f75; text-decoration: none;
+    padding: 10px 6px; margin: -4px -6px 0;
+  }
+  .corner a:hover { text-decoration: underline; color: #4a4e54; }
+  .corner a:focus-visible { outline: 2px solid #2f7fe0; outline-offset: 0; border-radius: 2px; }
+  noscript { font: 14px Roboto, Arial, sans-serif; color: #444; }
+</style>
+</head>
+<body>
+  <main>
+    <div id="captcha"></div>
+    <noscript>Please enable JavaScript to complete verification.</noscript>
+  </main>
+  <div class="corner"><a href="/embed">Add verification to your website</a></div>
+  <script src="/assets/content.js"></script>
+  <script src="/assets/tiles.js"></script>
+  <script src="/assets/captcha.js"></script>
+  <script>
+    CX.mount(document.getElementById("captcha"), { mode: "endless", source: "standalone", homeHref: "/", embedHref: "/embed" });
+    document.querySelector(".corner a").addEventListener("click", () => CX.track("embed_offer_opened", { from: "corner" }));
+  </script>
+</body>
+</html>
