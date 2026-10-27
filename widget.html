@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verification (entertainment only)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="/assets/captcha.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  body { display: flex; justify-content: center; padding: 4px; box-sizing: border-box; }
+  .fallback { font: 13px Roboto, Arial, sans-serif; color: #555; padding: 12px; }
+</style>
+</head>
+<body>
+  <div id="captcha"><p class="fallback">Verification is taking a break. Please continue being human.</p></div>
+  <script src="/assets/content.js"></script>
+  <script src="/assets/tiles.js"></script>
+  <script src="/assets/captcha.js"></script>
+  <script>
+    (function () {
+      // Allowlisted configuration only. Anything else falls back to the default.
+      var q = new URLSearchParams(location.search);
+      var mode = q.get("mode") === "single" ? "single" : "three";
+      var source = q.get("preview") === "1" ? "preview" : "widget";
+      try {
+        CX.mount(document.getElementById("captcha"), {
+          mode: mode, source: source, persist: false,
+          homeHref: location.origin + "/", embedHref: location.origin + "/embed"
+        });
+      } catch (e) { /* the fallback text stays; the host page is unaffected */ }
+    })();
+  </script>
+</body>
+</html>

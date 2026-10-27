@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add Verification to Your Website</title>
+<meta name="description" content="Ridiculous CAPTCHA-style challenges for your website. Entertainment only. Absolutely no useful security.">
+<meta property="og:title" content="Make your visitors question their humanity.">
+<meta property="og:description" content="Ridiculous CAPTCHA-style challenges for your website. Entertainment only. Absolutely no useful security.">
+<meta property="og:image" content="/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a deadpan application form. Left column = the form, right = the live specimen. */
+  :root {
+    --paper: #ffffff;
+    --ink: #1c2024;
+    --muted: #5d636b;
+    --rule: #dfe2e6;
+    --field: #f6f7f9;
+    --blue: #2f7fe0;
+    --blue-ink: #1f5fb4;
+    --stamp: #b3261e;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font: 16px/1.55 var(--sans);
+    padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+  }
+  a { color: var(--blue-ink); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .wrap { max-width: 1060px; margin: 0 auto; }
+
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--rule); font-size: 13px; }
+  .top a { text-decoration: none; padding: 6px 0; }
+  .top a:hover { text-decoration: underline; }
+  .formno { font-family: var(--mono); color: var(--muted); letter-spacing: .04em; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 56px; padding-block: 48px 32px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 32px; } }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  h1 { font-size: clamp(34px, 5.2vw, 56px); line-height: 1.04; letter-spacing: -.02em; font-weight: 700; margin: 0 0 18px; text-wrap: balance; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 34ch; margin: 0 0 8px; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .section { border-top: 1px solid var(--rule); padding-block: 26px; }
+  .section:first-of-type { margin-top: 32px; }
+  .section h2 { display: flex; gap: 12px; align-items: baseline; font-size: 17px; font-weight: 600; margin: 0 0 14px; }
+  .section h2 .n { font-family: var(--mono); font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border: 0; padding: 0; margin: 0; }
+  @media (max-width: 480px) { .choices { grid-template-columns: minmax(0, 1fr); } }
+  .choice { display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--field); border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
+  .choice:has(input:checked) { border-color: var(--blue); background: #fff; box-shadow: inset 0 0 0 1px var(--blue); }
+  .choice input { margin-top: 4px; accent-color: var(--blue); width: 18px; height: 18px; flex: none; }
+  .choice b { display: block; font-weight: 600; }
+  .choice span { font-size: 14px; color: var(--muted); }
+
+  .code { position: relative; }
+  .code pre { margin: 0; padding: 16px 16px 16px; background: #15191d; color: #e8ecf0; border-radius: 3px; font: 13px/1.6 var(--mono); overflow-x: auto; white-space: pre; }
+  .copyrow { display: flex; gap: 14px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .btn { font: 600 14px var(--sans); letter-spacing: .04em; text-transform: uppercase; background: var(--blue); color: #fff; border: 0; border-radius: 2px; height: 42px; padding: 0 20px; cursor: pointer; }
+  .btn:hover { background: var(--blue-ink); }
+  .copied { font-size: 14px; color: var(--muted); }
+  .hint { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 60ch; }
+
+  .places { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; }
+  @media (max-width: 480px) { .places { grid-template-columns: minmax(0, 1fr); } }
+  .places li { padding-left: 18px; position: relative; }
+  .places li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 8px; border: 1.5px solid var(--blue); border-radius: 1px; }
+  .places b { font-weight: 600; }
+  .places span { display: block; font-size: 14px; color: var(--muted); }
+
+  .notice { border: 1.5px solid var(--stamp); border-radius: 3px; padding: 16px 18px; position: relative; }
+  .notice .stamp { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--stamp); font-weight: 500; margin: 0 0 6px; }
+  .notice p { margin: 0 0 6px; }
+  .notice ul { margin: 6px 0 0; padding-left: 20px; }
+
+  .specimen { position: sticky; top: 24px; }
+  @media (max-width: 900px) { .specimen { position: static; } }
+  .specimen .label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .frame { border: 1px dashed #c4c9cf; border-radius: 3px; padding: 14px 6px; background: #fff; }
+  .frame iframe { display: block; width: 100%; height: 640px; border: 0; }
+  .specimen .caption { font-size: 13px; color: var(--muted); margin: 10px 2px 0; }
+
+  footer { border-top: 1px solid var(--rule); padding-block: 22px 32px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a href="/" id="back">&larr; Return to verification</a>
+    <span class="formno">Form CX-1 &middot; Rev. 2026-10</span>
+  </header>
+
+  <div class="grid">
+    <main>
+      <p class="eyebrow">Application to add verification</p>
+      <h1>Make your visitors question their humanity.</h1>
+      <p class="lede">Ridiculous CAPTCHA-style challenges for your website. <strong>Entertainment only. Absolutely no useful security.</strong></p>
+
+      <section class="section" aria-labelledby="s1">
+        <h2 id="s1"><span class="n">1.</span> Choose a length</h2>
+        <fieldset class="choices">
+          <legend class="vh" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Challenge length</legend>
+          <label class="choice"><input type="radio" name="mode" id="mode-three" value="three" checked><div><b>Three challenges</b><span>Starts almost normal, then gets worse. Ends with a checkmark.</span></div></label>
+          <label class="choice"><input type="radio" name="mode" id="mode-single" value="single"><div><b>One challenge</b><span>A single absurd question. Short and polite.</span></div></label>
+        </fieldset>
+      </section>
+
+      <section class="section" aria-labelledby="s2">
+        <h2 id="s2"><span class="n">2.</span> Copy the embed code</h2>
+        <div class="code"><pre id="code" tabindex="0" aria-label="Embed code"></pre></div>
+        <div class="copyrow">
+          <button type="button" class="btn" id="copy">Copy code</button>
+          <span class="copied" id="copied" role="status" aria-live="polite"></span>
+        </div>
+        <p class="hint">Paste it into any HTML block on your site. It runs in its own frame, so it can't touch your page, your forms, or your visitors' data. Keep the frame about 420 px wide and 640 px tall; it shrinks to fit narrower spaces.</p>
+      </section>
+
+      <section class="section" aria-labelledby="s3">
+        <h2 id="s3"><span class="n">3.</span> Put it somewhere fun</h2>
+        <ul class="places">
+          <li><b>404 pages</b><span>Lost visitors deserve one more question.</span></li>
+          <li><b>Personal sites</b><span>A guestbook alternative with worse judgment.</span></li>
+          <li><b>Easter eggs</b><span>Behind a tiny link nobody was supposed to click.</span></li>
+          <li><b>Interactive sections</b><span>An "are you still reading?" break in a long page.</span></li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="s4">
+        <div class="notice">
+          <p class="stamp" id="s4">Notice to site owners</p>
+          <p>This is a toy. Finishing it does not prove anyone is human, and it does not protect anything.</p>
+          <ul>
+            <li>Don't put it in front of checkout, signup, contact forms, or anything a visitor needs.</li>
+            <li>It sets no cookies on your site and sends no answers anywhere.</li>
+            <li>If it ever fails to load, your page carries on without it.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <aside class="specimen" aria-labelledby="spec-label">
+      <div class="label"><span id="spec-label">Live preview</span><span id="spec-mode">Three challenges</span></div>
+      <div class="frame">
+        <iframe id="preview" title="Preview of the verification widget (entertainment only)" src="/widget?mode=three&amp;preview=1" loading="eager"></iframe>
+      </div>
+      <p class="caption">This is exactly what your visitors get. Free while we find out who wants it.</p>
+    </aside>
+  </div>
+
+  <footer>
+    <span>CAPTCHaos. A parody verification provider. Not affiliated with any real one.</span>
+    <a href="/">Back to the verification</a>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var origin = location.origin;
+    var code = document.getElementById("code");
+    var preview = document.getElementById("preview");
+    var specMode = document.getElementById("spec-mode");
+    var copied = document.getElementById("copied");
+    var labels = { three: "Three challenges", single: "One challenge" };
+
+    function snippet(mode) {
+      return '<iframe\n  src="' + origin + '/widget?mode=' + mode + '"\n  title="Ridiculous verification (entertainment only)"\n  width="420" height="640"\n  style="border:0; max-width:100%;"\n  loading="lazy"></iframe>';
+    }
+    function current() { return document.querySelector('input[name="mode"]:checked').value; }
+    function update() {
+      var m = current();
+      code.textContent = snippet(m);
+      specMode.textContent = labels[m];
+      preview.src = "/widget?mode=" + m + "&preview=1";
+      copied.textContent = "";
+    }
+    document.querySelectorAll('input[name="mode"]').forEach(function (r) { r.addEventListener("change", update); });
+
+    document.getElementById("copy").addEventListener("click", function () {
+      var text = code.textContent;
+      var done = function () { copied.textContent = "Copied. Paste it into your site's HTML."; };
+      var fallback = function () {
+        var range = document.createRange();
+        range.selectNodeContents(code);
+        var sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        copied.textContent = "Selected. Press Ctrl+C or Cmd+C to copy.";
+      };
+      try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+      try { (window.cxEvents = window.cxEvents || []).push({ name: "embed_code_copied", mode: current(), t: Date.now() }); if (window.va) window.va("event", { name: "embed_code_copied", data: { mode: current() } }); } catch (e) {}
+    });
+
+    // "Return to verification": go back if we came from the verification, so the session resumes.
+    document.getElementById("back").addEventListener("click", function (e) {
+      try {
+        if (document.referrer && new URL(document.referrer).origin === origin && history.length > 1) { e.preventDefault(); history.back(); }
+      } catch (_) {}
+    });
+
+    update();
+  })();
+</script>
+</body>
+</html>
