@@ -149,6 +149,16 @@
       return weighted[Math.floor(Math.random() * weighted.length)];
     }
 
+    // Load photos for the challenges that could come next, so the swap is instant.
+    function preloadAhead() {
+      try {
+        const ids = bounded ? (opts.mode === "three" ? WIDGET_PACK.three : WIDGET_PACK.single)
+          : S.queue.length ? S.queue
+          : CHALLENGES.filter((x) => x.enabled && x.tiles && x.tier <= Math.min(5, 3 + Math.floor(S.count / 2))).map((x) => x.id);
+        ids.forEach((cid) => { const ch = BY_ID[cid]; if (ch && ch.tiles) window.CX_TILES.preload(ch.tiles, cid); });
+      } catch (_) { /* preloading is best effort */ }
+    }
+
     function tilesFor(c) {
       if (c.callbackFrom) return { tiles: BY_ID[c.callbackFrom].tiles, seedBase: c.callbackFrom };
       return { tiles: c.tiles, seedBase: c.id };
@@ -176,6 +186,7 @@
       closeInfo(false);
       announce(`${c.leadIn ? c.leadIn + " " : ""}${c.target} ${c.instruction || ""}`.trim());
       track("challenge_shown", { id: c.id, version: c.version, tier: c.tier, position: S.count + 1, source: opts.source });
+      preloadAhead();
       if (focus) el.target.focus({ preventScroll: true });
     }
 
@@ -207,8 +218,9 @@
       try {
         el.body.innerHTML = `<div class="cx-grid" role="group" aria-label="Image tiles">${
           tiles.map((t, i) => `<button type="button" class="cx-tile" data-i="${i}" aria-pressed="${selected.has(i)}" aria-label="Image ${i + 1}: ${esc(t[2])}">
-            <img alt="" src="${window.CX_TILES.tileImage(t, seedBase + ":" + i)}" draggable="false"><span class="cx-sel">${ICON.tick}</span></button>`).join("")
+            <img alt="" draggable="false"><span class="cx-sel">${ICON.tick}</span></button>`).join("")
         }</div>`;
+        el.body.querySelectorAll(".cx-tile img").forEach((im, i) => window.CX_TILES.fill(im, tiles[i], seedBase + ":" + i));
         el.body.querySelectorAll(".cx-tile").forEach((b) => b.addEventListener("click", () => {
           if (busy) return;
           toggle(+b.dataset.i, !selected.has(+b.dataset.i));
@@ -377,7 +389,7 @@
         ? `<a class="cx-link-btn" href="${esc(home)}" target="_blank" rel="noopener">Try the full verification</a>`
         : `<button type="button" class="cx-link-btn cx-copy">Copy this challenge link</button>`;
       return `<p><strong>${BRAND}</strong> is a parody verification box. It checks nothing, stores no answers, and protects nothing. Entertainment only.</p>
-        <div class="cx-info-actions">${share}<a class="cx-link-btn" href="${esc(embed)}"${bounded ? ' target="_blank" rel="noopener"' : ""}>Add verification to your website</a></div>
+        <div class="cx-info-actions">${share}<a class="cx-link-btn" href="${esc(embed)}"${bounded ? ' target="_blank" rel="noopener"' : ""}>Add verification to your website</a><a class="cx-link-btn" href="${esc(opts.creditsHref || "/credits")}"${bounded ? ' target="_blank" rel="noopener"' : ""}>Photo credits</a></div>
         <p class="cx-copied" aria-live="polite"></p>
         <button type="button" class="cx-link-btn cx-info-close">Close</button>`;
     }

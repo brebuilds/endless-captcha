@@ -30,9 +30,29 @@ lets only `/widget` be framed by other sites.
 
 - `assets/content.js` holds the challenge manifest: 28 challenges, the openers, and the widget pack. **Add or edit challenges here.**
 - `assets/captcha.js` is the component plus engine: states, escalation, history exclusion, callbacks, text mode, the info/share panel, session storage and analytics events.
-- `assets/tiles.js` draws each tile as a grainy, slightly crushed fake photo (emoji on a canvas scene). Output is deterministic per tile.
+- `assets/tiles.js` turns each tile's real photo into verification-style imagery: a random crop, washed-out color, grain, a vignette and low-res JPEG. If a photo is missing or fails to load, it falls back to a drawn tile (emoji on a canvas scene).
+- `assets/photos/`, `assets/photos.js` and `assets/photos/credits.json` hold the photos, the map from tile to photo, and the license record. All three are generated, so don't edit them by hand.
+- `credits.html` (`/credits`) is the attribution page that CC BY photos require. It's linked from the info panel and the offer page.
 - `assets/captcha.css` is the component's styles. It deliberately has one look and no dark mode.
 - `tests/e2e.cjs` is a headless Playwright run of the acceptance checks (below).
+
+### Photos
+
+Photos come from [Openverse](https://openverse.org), limited to CC0, public domain and CC BY,
+which all allow commercial use and modification. They're fetched once and stored in the repo,
+never pulled live on a visit.
+
+```sh
+node tools/fetch-photos.mjs             # fill in anything missing
+node tools/fetch-photos.mjs --refresh   # start over
+open http://localhost:4540/tools/photos-review   # contact sheet of every grid
+```
+
+- **Search terms** come from the tile's emoji (the `SUBJECTS` map in the script). Give a single tile its own term with a 4th field: `T("🪿", "park", "a goose", "angry goose")`.
+- **Results are filtered** to photos whose title or tags actually name the subject, best matches first.
+- **To reject a photo**, add its Openverse id (shown on the review sheet) to `tools/photo-overrides.json` under `{"exclude": [...]}`, then rerun the script.
+- **To change a subject's search term**, add `{"subjects": {"🪿": "domestic goose"}}`.
+- **Look at the review sheet before shipping.** The PRD requires a person to review every image.
 
 ### Adding a challenge
 
@@ -56,7 +76,7 @@ npx serve@14.2.4 -l 4541 <dir with a host index.html> # a separate origin that e
 CHROME_PATH=<optional chromium> node tests/e2e.cjs <screenshot dir>
 ```
 
-Last run (2026-10-27): **28/28 pass**. The run checked:
+Last run (2026-10-27): **31/31 pass**. The run checked:
 
 - the exact corner text, and the opener order
 - double-submit protection and the scripted retry
@@ -68,11 +88,12 @@ Last run (2026-10-27): **28/28 pass**. The run checked:
 - 320 px width with no overlap and no sideways scroll, on both pages
 - the three-challenge widget completing on a separate origin, and Try again
 - that the host form is untouched and the host page survives the widget's assets being blocked
+- that every tile shows a real photo, blocked photos fall back to drawn tiles, and the credits page lists every photo
 - no console errors
 
 ## Not done yet (PRD items that need a human or a decision)
 
-- **Photography.** Tiles are drawn emoji with grain, not photos. The PRD asks for mundane photos with recorded provenance. Swapping them in is a content job; the engine doesn't change.
+- **Final photo review.** The real photos are in, from Openverse, filtered and with credits recorded. A person still needs to go over `/tools/photos-review` and exclude anything off or unflattering.
 - **Name and domain.** Undecided (PRD section 15).
 - **Analytics sink.** Events fire to `window.cxEvents` and to Vercel Analytics `va()` if it's installed. Nothing is collected until a provider is added.
 - **Playtests.** Five observed playtests (PRD section 12), with the bar at 4 of 5 getting the joke by challenge three.

@@ -137,7 +137,12 @@
     ctx.fillText(emoji, 0, 0);
     ctx.restore();
 
-    // Wash out, add grain, vignette, then crush it through low-res JPEG.
+    return degrade(c, ctx, r, 76);
+  }
+
+  // Wash out, add grain, vignette, then crush it through low-res JPEG.
+  // Shared by drawn tiles and real photos so both look like verification imagery.
+  function degrade(c, ctx, r, out) {
     const img = ctx.getImageData(0, 0, SIZE, SIZE);
     const d = img.data;
     const warm = (r() - 0.5) * 14;
@@ -156,10 +161,24 @@
     ctx.fillRect(0, 0, SIZE, SIZE);
 
     const small = document.createElement("canvas");
-    small.width = small.height = 76;
+    small.width = small.height = out;
     const sctx = small.getContext("2d");
-    sctx.drawImage(c, 0, 0, 76, 76);
+    sctx.drawImage(c, 0, 0, out, out);
     return small.toDataURL("image/jpeg", 0.5);
+  }
+
+  // A real photo, cropped with a slight random zoom, then degraded.
+  // Photos keep a bit more resolution than drawn tiles so subjects stay identifiable.
+  function paintPhoto(photo, seed) {
+    const r = rng(seed);
+    const c = document.createElement("canvas");
+    c.width = c.height = SIZE;
+    const ctx = c.getContext("2d");
+    const side = Math.min(photo.naturalWidth, photo.naturalHeight) * (0.82 + r() * 0.18);
+    const sx = (photo.naturalWidth - side) * r();
+    const sy = (photo.naturalHeight - side) * r();
+    ctx.drawImage(photo, sx, sy, side, side, 0, 0, SIZE, SIZE);
+    return degrade(c, ctx, r, 104);
   }
 
   function tileImage(spec, seed) {
@@ -168,5 +187,43 @@
     return cache.get(key);
   }
 
-  window.CX_TILES = { tileImage };
+  const photoCache = new Map();
+  function loadPhoto(file) {
+    if (!photoCache.has(file)) {
+      photoCache.set(file, new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = (window.CX_ASSET_BASE || "/assets/") + file;
+      }));
+    }
+    return photoCache.get(file);
+  }
+
+  // Fill an <img> for a tile. Uses the real photo when one is mapped (assets/photos.js)
+  // and falls back to the drawn tile if there is none or it fails to load.
+  function fill(imgEl, spec, seed) {
+    const file = (window.CX_PHOTOS || {})[seed];
+    if (!file) { imgEl.src = tileImage(spec, seed); imgEl.dataset.kind = "drawn"; return Promise.resolve("drawn"); }
+    const key = "photo|" + seed;
+    if (cache.has(key)) { imgEl.src = cache.get(key); imgEl.dataset.kind = "photo"; return Promise.resolve("photo"); }
+    return loadPhoto(file).then((photo) => {
+      cache.set(key, paintPhoto(photo, seed));
+      imgEl.src = cache.get(key);
+      imgEl.dataset.kind = "photo";
+      return "photo";
+    }).catch(() => {
+      imgEl.src = tileImage(spec, seed);
+      imgEl.dataset.kind = "drawn";
+      return "drawn";
+    });
+  }
+
+  // Warm the cache for a challenge's tiles before it is shown.
+  function preload(tiles, seedBase) {
+    const map = window.CX_PHOTOS || {};
+    tiles.forEach((_, i) => { const f = map[seedBase + ":" + i]; if (f) loadPhoto(f).catch(() => {}); });
+  }
+
+  window.CX_TILES = { tileImage, fill, preload };
 })();

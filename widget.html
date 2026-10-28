@@ -18,6 +18,7 @@
 <body>
   <div id="captcha"><p class="fallback">Verification is taking a break. Please continue being human.</p></div>
   <script src="/assets/content.js"></script>
+  <script src="/assets/photos.js"></script>
   <script src="/assets/tiles.js"></script>
   <script src="/assets/captcha.js"></script>
   <script>
@@ -29,7 +30,7 @@
       try {
         CX.mount(document.getElementById("captcha"), {
           mode: mode, source: source, persist: false,
-          homeHref: location.origin + "/", embedHref: location.origin + "/embed"
+          homeHref: location.origin + "/", embedHref: location.origin + "/embed", creditsHref: location.origin + "/credits"
         });
       } catch (e) { /* the fallback text stays; the host page is unaffected */ }
     })();
