@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Photo Credits</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root { --ink: #1c2024; --muted: #5d636b; --rule: #dfe2e6; --blue: #1f5fb4; color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--ink); }
+  body {
+    font: 15px/1.5 "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+  }
+  a { color: var(--blue); }
+  .wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 48px; }
+  .top { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; border-bottom: 1px solid var(--rule); padding-bottom: 16px; }
+  .formno { font-family: "IBM Plex Mono", monospace; color: var(--muted); }
+  h1 { font-size: 28px; margin: 28px 0 6px; }
+  .lede { color: var(--muted); margin: 0 0 24px; max-width: 62ch; }
+  .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px 24px; padding: 0; margin: 0; list-style: none; }
+  .list li { display: flex; gap: 12px; align-items: flex-start; min-width: 0; font-size: 13px; }
+  .list img { width: 56px; height: 56px; object-fit: cover; flex: none; background: #eee; }
+  .list div { min-width: 0; overflow-wrap: anywhere; }
+  .list b { display: block; font-weight: 600; font-size: 14px; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/">&larr; Return to verification</a><span class="formno">Form CX-7 &middot; Image provenance</span></div>
+  <h1>Photo credits</h1>
+  <p class="lede">The verification images are openly licensed photos found through <a href="https://openverse.org" rel="noopener">Openverse</a>. They're shown cropped, desaturated, grainy and low resolution. No photographer endorses this verification provider, or any other.</p>
+  <ul class="list" id="list"><li class="muted">Loading credits&hellip;</li></ul>
+</div>
+<script>
+  fetch("/assets/photos/credits.json").then(function (r) { return r.json(); }).then(function (credits) {
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+    credits.sort(function (a, b) { return a.subject.localeCompare(b.subject); });
+    document.getElementById("list").innerHTML = credits.map(function (c) {
+      return '<li><img alt="" loading="lazy" src="/assets/' + esc(c.file) + '"><div><b>' + esc(c.title) + '</b>' +
+        'by ' + esc(c.creator) + ' &middot; <a href="' + esc(c.licenseUrl || "#") + '" rel="noopener">' + esc(c.license) + '</a>' +
+        ' &middot; <a href="' + esc(c.source) + '" rel="noopener">source</a><br><span class="muted">used as: ' + esc(c.subject) + '</span></div></li>';
+    }).join("");
+  }).catch(function () {
+    document.getElementById("list").innerHTML = '<li class="muted">Credits could not be loaded. Please try again.</li>';
+  });
+</script>
+</body>
+</html>

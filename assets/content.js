@@ -537,7 +537,7 @@
         T("🚗", "street", "a car"),
         T("🌳", "park", "a tree"),
         T("🪿", "park", "a goose"),
-        T("🧍", "street", "someone waiting for a bus"),
+        T("🚏", "street", "an empty bus stop"),
         T("🏠", "suburb", "a house"),
         T("🪑", "office", "an empty chair"),
         T("🖨️", "office", "a printer"),

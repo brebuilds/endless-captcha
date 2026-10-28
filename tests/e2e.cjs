@@ -53,6 +53,24 @@ async function playOne(page) {
   await page.screenshot({ path: OUT + "/02-first-challenge.png" });
   let ids = await shownIds(page);
   ok(ids[0] === "traffic-lights", "opener 1 = traffic lights (" + ids[0] + ")");
+  await page.waitForFunction(() => document.querySelectorAll(".cx-tile img[data-kind]").length === 9, null, { timeout: 5000 });
+  const photoTiles = await page.locator('.cx-tile img[data-kind="photo"]').count();
+  ok(photoTiles === 9, "first challenge shows 9 real photos (" + photoTiles + ")");
+
+  // photos blocked -> drawn fallback, still playable
+  const pb = await (await browser.newContext()).newPage();
+  await pb.route("**/assets/photos/**", (r) => r.abort());
+  pb.on("pageerror", (e) => errors.push("photo-fallback pageerror: " + e.message));
+  await pb.goto(BASE + "/");
+  await pb.click(".cx-box");
+  await pb.waitForFunction(() => document.querySelectorAll(".cx-tile img[data-kind]").length === 9, null, { timeout: 5000 });
+  ok((await pb.locator('.cx-tile img[data-kind="drawn"]').count()) === 9, "blocked photos fall back to drawn tiles");
+
+  // credits page lists every photo
+  const pc = await (await browser.newContext()).newPage();
+  await pc.goto(BASE + "/credits");
+  await pc.waitForSelector("#list li img", { timeout: 5000 });
+  ok((await pc.locator("#list li img").count()) > 50, "credits page lists photos (" + (await pc.locator("#list li img").count()) + ")");
 
   // answer traffic lights correctly
   for (const i of [0, 2, 5, 8]) await page.click(`.cx-tile[data-i="${i}"]`);
