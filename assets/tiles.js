@@ -194,7 +194,7 @@
         const im = new Image();
         im.onload = () => resolve(im);
         im.onerror = reject;
-        im.src = (window.CX_ASSET_BASE || "/assets/") + file;
+        im.src = (window.CX_ASSET_BASE ?? "/assets/") + file;
       }));
     }
     return photoCache.get(file);
