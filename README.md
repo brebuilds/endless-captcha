@@ -7,6 +7,16 @@ corner, **Add verification to your website**, leads to a free iframe embed.
 Spec: `docs/CAPTCHA-Website-PRD.md` (v1.0, 2026-10-27). Name and domain are
 undecided. The provider mark is "CAPTCHaos", a candidate name, set in `assets/captcha.js` (`BRAND`).
 
+## Live
+
+**https://endless-captcha.vercel.app** (Vercel project `endless-captcha`, team brebuilds, first deployed 2026-10-31).
+The project isn't connected to git, so pushing to `main` does **not** deploy. To ship a change,
+deploy a clean copy of `main`:
+
+```sh
+git clone https://github.com/brebuilds/endless-captcha.git /tmp/ec && cd /tmp/ec && vercel deploy --prod --yes
+```
+
 ## Run it
 
 ```sh
@@ -98,4 +108,3 @@ Last run (2026-10-27): **31/31 pass**. The run checked:
 - **Analytics sink.** Events fire to `window.cxEvents` and to Vercel Analytics `va()` if it's installed. Nothing is collected until a provider is added.
 - **Playtests.** Five observed playtests (PRD section 12), with the bar at 4 of 5 getting the joke by challenge three.
 - **Manual screen-reader pass** with VoiceOver and NVDA. The ARIA wiring is in place but hasn't been tested with a real screen reader.
-- **Deploy.** Not deployed. Publishing is Bre's call.
