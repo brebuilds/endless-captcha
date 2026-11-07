@@ -4,6 +4,8 @@ A white page with one "I'm not a robot" checkbox. Click it and you get an endles
 CAPTCHA challenges that start normal and steadily lose their minds. A tiny gray link in the
 corner, **Add verification to your website**, leads to a free iframe embed.
 
+![A CAPTCHA challenge from the live site](docs/screenshot.png)
+
 Spec: `docs/CAPTCHA-Website-PRD.md` (v1.0, 2026-10-27). Name and domain are
 undecided. The provider mark is "CAPTCHaos", a candidate name, set in `assets/captcha.js` (`BRAND`).
 
@@ -108,3 +110,7 @@ Last run (2026-10-27): **31/31 pass**. The run checked:
 - **Analytics sink.** Events fire to `window.cxEvents` and to Vercel Analytics `va()` if it's installed. Nothing is collected until a provider is added.
 - **Playtests.** Five observed playtests (PRD section 12), with the bar at 4 of 5 getting the joke by challenge three.
 - **Manual screen-reader pass** with VoiceOver and NVDA. The ARIA wiring is in place but hasn't been tested with a real screen reader.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
